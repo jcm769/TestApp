@@ -1,0 +1,68 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Jugando Números</title>
+    <style>
+        .selected {
+            border: 2px solid red;
+        }
+    </style>
+</head>
+<body>
+    <script src="https://telegram.org/js/telegram-web-app.js"></script>
+    <h1>Jugando Números</h1>
+    <div style="position: absolute; top: 0; right: 0;">
+        Saldo: <span id="saldo"></span>
+    </div>
+    <div>
+        <table>
+            <tr>
+                <td><img src="1.jpg" alt="1" onclick="seleccionarNumero(1)"></td>
+                <td><img src="2.jpg" alt="2" onclick="seleccionarNumero(2)"></td>
+                <td><img src="3.jpg" alt="3" onclick="seleccionarNumero(3)"></td>
+                <td><img src="4.jpg" alt="4" onclick="seleccionarNumero(4)"></td>
+            </tr>
+        </table>
+        <input type="number" id="monto" value="1" min="1">
+        <div id="jugada"></div>
+        <button onclick="finalizar()">Finalizar</button>
+    </div>
+
+    <script>
+        let tg = window.Telegram.WebApp;
+        tg.expand();
+        let saldo = document.getElementById("saldo").textContent;
+        let jugada = {};
+        function seleccionarNumero(numero) {
+            const monto = parseInt(document.getElementById("monto").value);
+            if (!jugada[numero] && monto >= 1 && monto <= saldo) {
+                saldo -= monto;
+                jugada[numero] = monto;
+                document.querySelector(`img[alt="${numero}"]`).classList.add("selected");
+                actualizarJugada();
+            } else if (jugada[numero]) {
+                saldo += jugada[numero];
+                delete jugada[numero];
+                document.querySelector(`img[alt="${numero}"]`).classList.remove("selected");
+                actualizarJugada();
+            } else {
+                alert("El monto debe ser un número entero entre 1 y el saldo actual.");
+            }
+        }
+
+        function actualizarJugada() {
+            const jugadaTexto = Object.entries(jugada).map(([numero, monto]) => `${numero} X ${monto}`).join(", ");
+            document.getElementById("jugada").textContent = jugadaTexto;
+            document.getElementById("saldo").textContent = saldo;
+        }
+
+        function finalizar() {
+            alert("Jugada final: " + JSON.stringify(jugada));
+            tg.sendData(JSON.stringify(jugada))
+            tg.close()
+        }
+    </script>
+</body>
+</html>
